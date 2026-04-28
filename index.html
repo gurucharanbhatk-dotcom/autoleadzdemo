@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoLeadz – Live Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--g:#0BC47A;--dark:#0D1117;--card:#111820;--border:rgba(255,255,255,0.08);--muted:rgba(255,255,255,0.45);--text:#F0F4F8}
+body{font-family:'DM Sans',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden}
+h1,h2,h3{font-family:'Syne',sans-serif}
+.header{background:rgba(13,17,23,0.97);border-bottom:1px solid var(--border);padding:0.9rem 1.5rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--g)}
+.demo-badge{background:rgba(11,196,122,0.15);border:1px solid rgba(11,196,122,0.35);border-radius:50px;padding:0.28rem 0.85rem;font-size:0.7rem;color:var(--g);font-weight:600}
+.steps-nav{display:flex;justify-content:center;gap:0;margin:1.25rem auto;max-width:700px;padding:0 1rem}
+.step-dot{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.step-dot:not(:last-child)::after{content:'';position:absolute;top:14px;left:60%;right:-40%;height:2px;background:var(--border);z-index:0}
+.step-dot.done:not(:last-child)::after{background:var(--g)}
+.dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:700;z-index:1;transition:all 0.3s}
+.step-dot.active .dot{border-color:var(--g);background:var(--g);color:#000}
+.step-dot.done .dot{border-color:var(--g);background:var(--g);color:#000}
+.dot-label{font-size:0.62rem;color:var(--muted);text-align:center;max-width:58px}
+.step-dot.active .dot-label,.step-dot.done .dot-label{color:var(--g)}
+.main{max-width:720px;margin:0 auto;padding:1rem 1rem 4rem}
+.screen{display:none;animation:fadeIn 0.35s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:1.75rem;margin-bottom:1rem}
+.form-card h3{font-size:1.15rem;font-weight:800;margin-bottom:0.3rem}
+.form-card p{font-size:0.83rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.6}
+.field{margin-bottom:0.9rem}
+.field label{display:block;font-size:0.74rem;color:var(--muted);font-weight:500;margin-bottom:4px}
+.field input,.field select{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:9px;padding:0.68rem 0.9rem;font-family:'DM Sans',sans-serif;font-size:0.88rem;color:var(--text);outline:none;transition:border-color 0.2s}
+.field input:focus,.field select:focus{border-color:var(--g)}
+.field select option{background:#1a2230}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:0.85rem}
+@media(max-width:500px){.field-row{grid-template-columns:1fr}}
+.next-btn{width:100%;background:var(--g);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:0.92rem;padding:0.85rem;border-radius:50px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:0.5rem;transition:transform 0.2s,box-shadow 0.2s}
+.next-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(11,196,122,0.3)}
+.info-box{background:rgba(11,196,122,0.06);border:1px solid rgba(11,196,122,0.15);border-radius:12px;padding:0.85rem;margin-bottom:1rem;font-size:0.8rem;color:var(--muted);line-height:1.6}
+.info-box strong{color:var(--text)}
+.customize-banner{background:linear-gradient(90deg,rgba(11,196,122,0.1),rgba(11,196,122,0.03));border:1px solid rgba(11,196,122,0.2);border-radius:12px;padding:0.8rem 1rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:10px;font-size:0.79rem;color:var(--muted);line-height:1.5}
+.customize-banner span{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.customize-banner strong{color:var(--g)}
+/* WHATSAPP */
+.wa-phone{background:#0a1014;border-radius:20px;overflow:hidden;border:1px solid rgba(11,196,122,0.2);margin-bottom:1rem;max-width:440px;margin-left:auto;margin-right:auto}
+.wa-header{background:linear-gradient(90deg,#075e54,#128c7e);padding:10px 14px;display:flex;align-items:center;gap:10px}
+.wa-av{width:38px;height:38px;border-radius:50%;background:var(--g);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;color:#000;flex-shrink:0}
+.wa-info .name{font-size:0.9rem;font-weight:700;color:#fff}
+.wa-info .status{font-size:0.7rem;color:rgba(255,255,255,0.75);display:flex;align-items:center;gap:4px}
+.online-dot{width:6px;height:6px;border-radius:50%;background:#4cff91;display:inline-block}
+.wa-body{padding:10px;min-height:260px;background:#0d1c24;display:flex;flex-direction:column;gap:7px;overflow-y:auto;max-height:380px}
+.wbubble{max-width:86%;padding:8px 12px;border-radius:12px;font-size:0.82rem;line-height:1.5}
+.wbubble .wtime{font-size:0.63rem;color:rgba(255,255,255,0.35);text-align:right;margin-top:3px}
+.wbubble .tick{color:var(--g)}
+.wbubble.recv{background:#1e3a2f;border-radius:2px 12px 12px 12px;align-self:flex-start}
+.wbubble.sent{background:#005c4b;border-radius:12px 2px 12px 12px;align-self:flex-end}
+.wtyping{display:flex;align-items:center;gap:4px;padding:8px 12px;background:#1e3a2f;border-radius:2px 12px 12px 12px;width:50px;align-self:flex-start}
+.wtyping span{width:5px;height:5px;border-radius:50%;background:var(--g);animation:td 1.2s infinite}
+.wtyping span:nth-child(2){animation-delay:.2s}
+.wtyping span:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+.wa-input-bar{background:#1a2530;padding:8px 12px;display:flex;align-items:center;gap:8px;border-top:1px solid rgba(255,255,255,0.06)}
+.wa-type{flex:1;background:rgba(255,255,255,0.07);border:none;border-radius:20px;padding:7px 14px;font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--text);outline:none}
+.wa-send{width:34px;height:34px;background:var(--g);border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform 0.15s}
+.wa-send:hover{transform:scale(1.1)}
+.chips-wrap{padding:8px 10px;background:#0d1c24;border-top:1px solid rgba(255,255,255,0.04);display:none;flex-wrap:wrap;gap:6px}
+.chip{background:rgba(11,196,122,0.1);border:1px solid rgba(11,196,122,0.3);border-radius:50px;padding:6px 13px;font-size:0.75rem;color:var(--g);cursor:pointer;transition:background 0.15s,transform 0.1s;font-family:'DM Sans',sans-serif;white-space:nowrap}
+.chip:hover{background:rgba(11,196,122,0.22);transform:scale(1.03)}
+.chip:active{transform:scale(0.96)}
+/* flow stage indicator */
+.flow-stage{background:rgba(11,196,122,0.08);border:1px solid rgba(11,196,122,0.15);border-radius:8px;padding:5px 12px;font-size:0.7rem;color:var(--g);margin-bottom:8px;display:inline-flex;align-items:center;gap:5px}
+/* CALENDAR */
+.cal-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:1rem}
+.cal-header{background:linear-gradient(90deg,#1a73e8,#1557b0);padding:11px 16px;display:flex;justify-content:space-between;align-items:center}
+.cal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;color:#fff}
+.cal-nav{background:rgba(255,255,255,0.15);border:none;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:0.85rem}
+.cal-grid-wrap{padding:10px 12px 4px}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px}
+.cal-day-name{text-align:center;font-size:0.63rem;color:var(--muted);padding:3px 0;font-weight:600}
+.cal-date{text-align:center;font-size:0.74rem;padding:7px 2px;border-radius:7px;cursor:pointer;transition:background 0.15s,color 0.15s;color:var(--text)}
+.cal-date:hover:not(.empty):not(.past):not(.booked){background:rgba(11,196,122,0.15);color:var(--g)}
+.cal-date.today{background:rgba(26,115,232,0.2);color:#4d9ff8;font-weight:700}
+.cal-date.selected{background:var(--g)!important;color:#000!important;font-weight:700}
+.cal-date.booked{color:rgba(255,80,80,0.4);cursor:not-allowed;background:rgba(255,80,80,0.05)}
+.cal-date.past{color:rgba(255,255,255,0.15);cursor:not-allowed}
+.cal-date.empty{cursor:default;color:transparent}
+.legend{display:flex;gap:12px;padding:0 12px 8px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:0.65rem;color:var(--muted)}
+.leg-dot{width:8px;height:8px;border-radius:2px}
+.time-slots{padding:0 12px 12px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.slot{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:7px;text-align:center;font-size:0.74rem;cursor:pointer;transition:all 0.15s;color:var(--muted)}
+.slot:hover:not(.taken){border-color:var(--g);color:var(--g);background:rgba(11,196,122,0.07)}
+.slot.selected{background:var(--g);color:#000;border-color:var(--g);font-weight:700}
+.slot.taken{color:rgba(255,255,255,0.15);cursor:not-allowed;text-decoration:line-through;font-size:0.68rem}
+.confirm-appt-btn{margin:0 12px 12px;width:calc(100% - 24px);background:var(--g);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:0.86rem;padding:0.75rem;border-radius:50px;border:none;cursor:pointer;transition:transform 0.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.confirm-appt-btn:disabled{background:rgba(255,255,255,0.08);color:var(--muted);cursor:not-allowed;transform:none!important}
+.appt-confirm-popup{background:linear-gradient(135deg,rgba(11,196,122,0.12),rgba(11,196,122,0.04));border:1px solid rgba(11,196,122,0.3);border-radius:16px;padding:1.25rem;margin-bottom:1rem;display:none;animation:fadeIn 0.4s ease}
+.appt-confirm-popup h4{font-size:1rem;font-weight:800;color:var(--g);margin-bottom:0.5rem}
+.appt-confirm-popup p{font-size:0.82rem;color:var(--muted);line-height:1.6}
+/* SHEET */
+.sheet-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:1rem}
+.sheet-hdr{background:#188038;padding:9px 14px;display:flex;align-items:center;gap:8px}
+.sheet-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;color:#fff}
+.sheet-tabs{background:#1d5c2e;display:flex;border-bottom:1px solid rgba(255,255,255,0.1)}
+.stab{padding:5px 14px;font-size:0.7rem;color:rgba(255,255,255,0.55);cursor:default}
+.stab.active{background:#188038;color:#fff;font-weight:600}
+.sheet-table{width:100%;border-collapse:collapse;font-size:0.73rem}
+.sheet-table th{background:#1a3a22;color:rgba(255,255,255,0.55);padding:6px 8px;text-align:left;font-weight:600;border:1px solid rgba(255,255,255,0.06);font-size:0.66rem;white-space:nowrap}
+.sheet-table td{padding:6px 8px;border:1px solid rgba(255,255,255,0.05);color:var(--muted);white-space:nowrap}
+.new-row td{animation:rowFlash 1s ease;background:rgba(11,196,122,0.08)!important}
+@keyframes rowFlash{0%{background:rgba(11,196,122,0.35)!important}100%{background:rgba(11,196,122,0.08)!important}}
+.status-pill{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:50px;font-size:0.63rem;font-weight:600}
+.s-new{background:rgba(11,196,122,0.15);color:var(--g)}
+.s-conf{background:rgba(26,115,232,0.15);color:#4d9ff8}
+.s-done{background:rgba(255,200,0,0.12);color:#ffc800}
+/* REVIEW */
+.review-wrap{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:1rem}
+.review-hdr{background:#ea4335;padding:9px 14px;display:flex;align-items:center;gap:8px}
+.g-badge{width:22px;height:22px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#ea4335}
+.review-hdr-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;color:#fff}
+.review-body{padding:1rem}
+.wa-review-bubble{background:#1e3a2f;border-radius:12px;padding:0.9rem;margin-bottom:1rem;font-size:0.81rem;line-height:1.6;color:#e2f8f0}
+.wa-review-bubble .sender{font-weight:700;color:var(--g);margin-bottom:5px;font-size:0.75rem}
+.stars-row{display:flex;gap:6px;margin-bottom:0.5rem;justify-content:center}
+.star{font-size:1.9rem;cursor:pointer;transition:transform 0.15s;opacity:0.2;filter:grayscale(1)}
+.star.lit{opacity:1;filter:none;transform:scale(1.1)}
+.star:hover{transform:scale(1.18)}
+.star-label{text-align:center;font-size:0.76rem;color:var(--muted);margin-bottom:0.75rem;min-height:1.2em}
+.review-text{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:9px;padding:0.7rem;font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--text);outline:none;resize:none;margin-bottom:0.75rem;transition:border-color 0.2s}
+.review-text:focus{border-color:#ea4335}
+.post-review-btn{width:100%;background:#ea4335;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:0.86rem;padding:0.7rem;border-radius:50px;border:none;cursor:pointer;transition:opacity 0.2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.post-review-btn:hover{opacity:0.88}
+/* SUCCESS */
+.success-screen{text-align:center;padding:1.5rem 0.5rem}
+.success-icon{font-size:3.5rem;margin-bottom:0.9rem;animation:bounce 0.5s ease}
+@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.success-screen h2{font-size:1.5rem;font-weight:800;color:var(--g);margin-bottom:0.65rem;letter-spacing:-0.5px}
+.success-screen>p{color:var(--muted);font-size:0.88rem;line-height:1.7;margin-bottom:1.25rem}
+.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.7rem;margin-bottom:1.25rem}
+.result-card{background:var(--card);border:1px solid rgba(11,196,122,0.2);border-radius:14px;padding:0.9rem;text-align:center}
+.result-card .emoji{font-size:1.4rem;margin-bottom:0.35rem}
+.result-card .val{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--g)}
+.result-card .lbl{font-size:0.65rem;color:var(--muted)}
+.customize-box{background:linear-gradient(135deg,rgba(11,196,122,0.1),rgba(11,196,122,0.03));border:1px solid rgba(11,196,122,0.25);border-radius:16px;padding:1.1rem;margin-bottom:1rem;text-align:left}
+.customize-box h4{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;color:var(--g);margin-bottom:0.5rem}
+.customize-box ul{padding-left:1.1rem;margin-bottom:0.85rem}
+.customize-box li{font-size:0.8rem;color:var(--muted);margin-bottom:0.3rem;line-height:1.5}
+.customize-box li strong{color:var(--text)}
+.wa-cta{display:inline-flex;align-items:center;gap:8px;background:var(--g);color:#000;font-family:'Syne',sans-serif;font-weight:800;font-size:0.88rem;padding:0.8rem 1.8rem;border-radius:50px;text-decoration:none;transition:transform 0.2s,box-shadow 0.2s}
+.wa-cta:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(11,196,122,0.35)}
+.cta-block{text-align:center}
+.cta-block p{font-size:0.84rem;color:var(--muted);margin-bottom:0.85rem;line-height:1.6}
+/* reminder preview */
+.reminder-bubble{background:#1e2f3a;border:1px solid rgba(11,196,122,0.15);border-radius:12px;padding:0.9rem;margin-bottom:0.75rem;font-size:0.8rem;line-height:1.6;color:var(--muted)}
+.reminder-bubble .rb-header{font-family:'Syne',sans-serif;font-weight:700;font-size:0.78rem;color:var(--g);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">AutoLeadz</div>
+  <div class="demo-badge">✦ Interactive Demo</div>
+</div>
+
+<div class="steps-nav">
+  <div class="step-dot active" id="sd-0"><div class="dot">1</div><div class="dot-label">Your Info</div></div>
+  <div class="step-dot" id="sd-1"><div class="dot">2</div><div class="dot-label">WhatsApp</div></div>
+  <div class="step-dot" id="sd-2"><div class="dot">3</div><div class="dot-label">Booking</div></div>
+  <div class="step-dot" id="sd-3"><div class="dot">4</div><div class="dot-label">Reminders</div></div>
+  <div class="step-dot" id="sd-4"><div class="dot">5</div><div class="dot-label">Leads Sheet</div></div>
+  <div class="step-dot" id="sd-5"><div class="dot">6</div><div class="dot-label">Review</div></div>
+  <div class="step-dot" id="sd-6"><div class="dot">✓</div><div class="dot-label">Done!</div></div>
+</div>
+
+<div class="main">
+
+<!-- S0: INFO -->
+<div class="screen active" id="s0">
+  <div class="form-card">
+    <h3>👋 Try AutoLeadz — Free Interactive Demo</h3>
+    <p>Enter your details below. Experience exactly what your customers will go through — from first WhatsApp message to Google review request. All automated.</p>
+    <div class="field-row">
+      <div class="field"><label>Your Name *</label><input id="d-name" placeholder="Rahul Sharma"/></div>
+      <div class="field"><label>WhatsApp Number *</label><input id="d-phone" placeholder="9876543210" maxlength="10" type="tel"/></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Business Name *</label><input id="d-biz" placeholder="Style Studio"/></div>
+      <div class="field"><label>Your City</label><input id="d-city" placeholder="Bengaluru"/></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Main Service *</label>
+        <select id="d-service">
+          <option value="">Select your service</option>
+          <optgroup label="Salon & Wellness">
+            <option>Haircut & Styling</option><option>Facial & Skin Care</option>
+            <option>Manicure & Pedicure</option><option>Hair Spa & Treatment</option><option>Massage Therapy</option>
+          </optgroup>
+          <optgroup label="Healthcare">
+            <option>Dental Checkup</option><option>General Consultation</option>
+            <option>Physiotherapy Session</option><option>Eye Checkup</option>
+          </optgroup>
+          <optgroup label="Fitness">
+            <option>Personal Training</option><option>Yoga Class</option><option>Zumba / Dance Class</option>
+          </optgroup>
+          <optgroup label="Professional">
+            <option>Property Consultation</option><option>Tax Filing / CA Service</option>
+            <option>Legal Consultation</option><option>Photography Session</option><option>Coaching / Tuition</option>
+          </optgroup>
+          <optgroup label="Food & Events">
+            <option>Restaurant Table Booking</option><option>Catering Inquiry</option><option>Event Planning</option>
+          </optgroup>
+          <optgroup label="Other">
+            <option>Home Cleaning Service</option><option>Car Service / Repair</option><option>Other Service</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field"><label>Bot Language Style</label>
+        <select id="d-lang">
+          <option value="en">English — Professional</option>
+          <option value="en-fun">English — Fun & Energetic</option>
+          <option value="hi">Hindi Mix — Friendly</option>
+          <option value="after">After Hours — Night Mode</option>
+        </select>
+      </div>
+    </div>
+    <button class="next-btn" onclick="startDemo()">▶ Start My Demo Experience</button>
+  </div>
+  <div class="info-box">🎯 <strong>This is a simulation.</strong> Shows exactly what your customers experience — instant replies, booking, reminders, lead saving & review requests. 100% automated, 0 manual work.</div>
+</div>
+
+<!-- S1: WHATSAPP -->
+<div class="screen" id="s1">
+  <div class="info-box">💬 <strong>Step 1 — WhatsApp Auto-Reply.</strong> Watch what happens the moment a customer messages <strong id="wa-biz-label"></strong>. Bot replies instantly — 24/7. <em>Tap the options to explore the full flow.</em></div>
+  <div class="customize-banner"><span>✏️</span><div><strong>Fully Customisable:</strong> Greeting message, menu options, language (Hindi/English/Regional), tone (formal/friendly/fun), services list, offers, working hours — all tailored to your exact business.</div></div>
+  <div class="wa-phone">
+    <div class="wa-header">
+      <div class="wa-av" id="wa-av">AL</div>
+      <div class="wa-info">
+        <div class="name" id="wa-biz-name">AutoLeadz Bot</div>
+        <div class="status"><span class="online-dot"></span> Online — Replies instantly</div>
+      </div>
+    </div>
+    <div class="wa-body" id="wa-msgs"></div>
+    <div class="chips-wrap" id="chips-wrap"></div>
+    <div class="wa-input-bar">
+      <input class="wa-type" id="wa-input" placeholder="Or type your reply here..."/>
+      <button class="wa-send" onclick="waSendTyped()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+  <button class="next-btn" id="wa-next" onclick="goTo(2)" style="display:none">Next: Pick Your Appointment Slot →</button>
+</div>
+
+<!-- S2: CALENDAR -->
+<div class="screen" id="s2">
+  <div class="info-box">📅 <strong>Step 2 — Auto Booking Calendar.</strong> Customer picks date & time themselves. No phone calls, no back-and-forth. Confirmation sent on WhatsApp automatically via Calendly + Wati.</div>
+  <div class="customize-banner"><span>✏️</span><div><strong>Fully Customisable:</strong> Your working days, blocked dates, available time slots, service duration, buffer time between appointments — all set up for your schedule.</div></div>
+  <div class="cal-wrap">
+    <div class="cal-header">
+      <button class="cal-nav" onclick="prevMonth()">‹</button>
+      <div class="cal-title" id="cal-title"></div>
+      <button class="cal-nav" onclick="nextMonth()">›</button>
+    </div>
+    <div class="cal-grid-wrap"><div class="cal-days" id="cal-days"></div></div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:var(--g)"></div>Selected</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(26,115,232,0.5)"></div>Today</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(255,80,80,0.3)"></div>Fully Booked</div>
+    </div>
+    <div class="time-slots" id="time-slots"></div>
+    <button class="confirm-appt-btn" id="confirm-appt" onclick="confirmAppt()" disabled>Select a date & time above</button>
+  </div>
+  <div class="appt-confirm-popup" id="appt-popup">
+    <h4>✅ Appointment Confirmed!</h4>
+    <p id="appt-popup-text"></p>
+  </div>
+</div>
+
+<!-- S3: REMINDERS -->
+<div class="screen" id="s3">
+  <div class="info-box">🔔 <strong>Step 3 — Auto Reminders.</strong> After booking, AutoLeadz automatically sends these WhatsApp reminders — no manual follow-up ever needed.</div>
+  <div class="customize-banner"><span>✏️</span><div><strong>Fully Customisable:</strong> Timing (1 day before, 2 hours before, or both), message content, language, and whether to ask for confirmation reply.</div></div>
+
+  <div class="reminder-bubble">
+    <div class="rb-header">⏰ Reminder sent — 24 hours before appointment</div>
+    <span id="reminder-24"></span>
+  </div>
+
+  <div class="reminder-bubble">
+    <div class="rb-header">⏰ Reminder sent — 2 hours before appointment</div>
+    <span id="reminder-2"></span>
+  </div>
+
+  <div class="reminder-bubble">
+    <div class="rb-header">💰 Payment reminder (if applicable)</div>
+    <span id="reminder-pay"></span>
+  </div>
+
+  <button class="next-btn" onclick="goTo(4)">Next: See Lead Auto-Saved →</button>
+</div>
+
+<!-- S4: SHEET -->
+<div class="screen" id="s4">
+  <div class="info-box">📊 <strong>Step 4 — Lead Auto-Saved to Google Sheet.</strong> The moment appointment was confirmed, lead was saved automatically. Every customer tracked in one place — forever.</div>
+  <div class="customize-banner"><span>✏️</span><div><strong>Fully Customisable:</strong> Columns, payment status, follow-up tags, notes column, source tracking — sheet structure set exactly how you want it.</div></div>
+  <div class="sheet-wrap">
+    <div class="sheet-hdr"><span style="font-size:1rem">📗</span><div class="sheet-title" id="sheet-title">AutoLeadz — My Leads</div></div>
+    <div class="sheet-tabs"><div class="stab active">All Leads</div><div class="stab">This Week</div><div class="stab">Pending</div></div>
+    <div style="overflow-x:auto">
+      <table class="sheet-table">
+        <thead><tr><th>#</th><th>Name</th><th>Phone</th><th>Service</th><th>Date & Time</th><th>City</th><th>Status</th></tr></thead>
+        <tbody id="sheet-body"></tbody>
+      </table>
+    </div>
+  </div>
+  <button class="next-btn" onclick="goTo(5)">Next: See Auto Review Request →</button>
+</div>
+
+<!-- S5: REVIEW -->
+<div class="screen" id="s5">
+  <div class="info-box">⭐ <strong>Step 5 — Auto Google Review Request.</strong> After service, this WhatsApp message is sent automatically. Your Google rating grows without asking anyone manually.</div>
+  <div class="customize-banner"><span>✏️</span><div><strong>Fully Customisable:</strong> Send timing (1 hr/2 hrs/next day), message tone, your Google Business link, and AI auto-replies to every review you receive.</div></div>
+  <div class="review-wrap">
+    <div class="review-hdr"><div class="g-badge">G</div><div class="review-hdr-title">Google Review — Auto-Sent After Service</div></div>
+    <div class="review-body">
+      <div class="wa-review-bubble">
+        <div class="sender">AutoLeadz Bot · <span id="review-biz-name"></span></div>
+        <span id="review-msg-text"></span>
+      </div>
+      <div class="star-label" id="star-label">Tap a star to rate your experience</div>
+      <div class="stars-row" id="stars">
+        <span class="star" onclick="rateStar(1)">★</span>
+        <span class="star" onclick="rateStar(2)">★</span>
+        <span class="star" onclick="rateStar(3)">★</span>
+        <span class="star" onclick="rateStar(4)">★</span>
+        <span class="star" onclick="rateStar(5)">★</span>
+      </div>
+      <textarea class="review-text" id="review-input" rows="3" placeholder="Write your review... (optional)"></textarea>
+      <button class="post-review-btn" onclick="postReview()"><span style="font-weight:800;font-size:1rem">G</span> Post to Google Reviews</button>
+    </div>
+  </div>
+</div>
+
+<!-- S6: SUCCESS -->
+<div class="screen" id="s6">
+  <div class="success-screen">
+    <div class="success-icon">🚀</div>
+    <h2>That's AutoLeadz Live!</h2>
+    <p>You just experienced the full automation — <strong style="color:var(--text)">instant WhatsApp reply, offers, pricing, booking, reminders, lead saved, and review request</strong> — all without touching your phone once.</p>
+    <div class="results-grid">
+      <div class="result-card"><div class="emoji">💬</div><div class="val">0 sec</div><div class="lbl">Reply Time</div></div>
+      <div class="result-card"><div class="emoji">📅</div><div class="val">1 click</div><div class="lbl">Booking</div></div>
+      <div class="result-card"><div class="emoji">⭐</div><div class="val">Auto</div><div class="lbl">Review Ask</div></div>
+    </div>
+    <div class="customize-box">
+      <h4>✏️ Everything You Saw is Customisable for Your Business</h4>
+      <ul>
+        <li><strong>WhatsApp greeting & menu</strong> — your language, tone, services, Hindi/English/Regional</li>
+        <li><strong>Offers & discounts</strong> — first visit, seasonal, referral — all auto-shown</li>
+        <li><strong>Booking calendar</strong> — your hours, off days, service duration</li>
+        <li><strong>Reminder timing</strong> — 24 hours before, 2 hours before, or both</li>
+        <li><strong>Google Sheet columns</strong> — payment status, notes, follow-up tags</li>
+        <li><strong>Review request timing</strong> — 1 hour, 2 hours, or next day after service</li>
+        <li><strong>After-hours message</strong> — different reply when closed vs open</li>
+        <li><strong>Missed call auto-reply</strong> — customer calls, misses, gets WhatsApp instantly</li>
+        <li><strong>Multi-language</strong> — Kannada, Hindi, Tamil, Telugu — we set it up for you</li>
+      </ul>
+      <div class="cta-block">
+        <p>Ready to go live for <strong style="color:var(--text)" id="success-biz"></strong>? We set everything up in 48 hours. Starting at just ₹3,999.</p>
+        <a id="wa-cta-link" href="#" target="_blank" class="wa-cta">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Set This Up for My Business →
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+var D={name:'',phone:'',biz:'',service:'',city:'',lang:'en'};
+var selDate=null,selTime=null,selDateObj=null,starRating=0;
+var calYear,calMonth;
+var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var ALL_SLOTS=['9:00 AM','10:00 AM','11:00 AM','12:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM'];
+var fullyBooked=[];
+var takenSlotsMap={};
+
+// Generate fake busy dates
+(function(){
+  var now=new Date();
+  for(var i=0;i<6;i++){
+    var d=new Date(now);d.setDate(now.getDate()+Math.floor(Math.random()*20)+2);
+    fullyBooked.push(d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate());
+  }
+  for(var j=0;j<8;j++){
+    var d2=new Date(now);d2.setDate(now.getDate()+Math.floor(Math.random()*14)+1);
+    var key=d2.getFullYear()+'-'+d2.getMonth()+'-'+d2.getDate();
+    if(!takenSlotsMap[key])takenSlotsMap[key]=[];
+    var s=ALL_SLOTS[Math.floor(Math.random()*ALL_SLOTS.length)];
+    if(!takenSlotsMap[key].includes(s))takenSlotsMap[key].push(s);
+  }
+})();
+
+// Price map
+var priceMap={
+  'Haircut & Styling':'₹300 – ₹800','Facial & Skin Care':'₹600 – ₹1,500',
+  'Manicure & Pedicure':'₹400 – ₹900','Hair Spa & Treatment':'₹800 – ₹2,000',
+  'Massage Therapy':'₹1,000 – ₹2,500','Dental Checkup':'₹500 – ₹1,500',
+  'General Consultation':'₹300 – ₹800','Physiotherapy Session':'₹800 – ₹1,500',
+  'Eye Checkup':'₹400 – ₹1,000','Personal Training':'₹1,500 – ₹3,000/mo',
+  'Yoga Class':'₹800 – ₹2,000/mo','Zumba / Dance Class':'₹700 – ₹1,500/mo',
+  'Property Consultation':'Free initial consultation','Tax Filing / CA Service':'₹2,000 – ₹5,000',
+  'Legal Consultation':'₹1,000 – ₹3,000','Photography Session':'₹5,000 – ₹15,000',
+  'Coaching / Tuition':'₹2,000 – ₹5,000/mo','Restaurant Table Booking':'No charge',
+  'Catering Inquiry':'₹150 – ₹400/plate','Event Planning':'₹20,000+',
+  'Home Cleaning Service':'₹800 – ₹2,000','Car Service / Repair':'₹500 – ₹5,000',
+  'Other Service':'Contact us for pricing'
+};
+
+function startDemo(){
+  D.name=document.getElementById('d-name').value.trim();
+  D.phone=document.getElementById('d-phone').value.trim();
+  D.biz=document.getElementById('d-biz').value.trim();
+  D.service=document.getElementById('d-service').value;
+  D.city=document.getElementById('d-city').value.trim()||'your city';
+  D.lang=document.getElementById('d-lang').value;
+  if(!D.name||!D.phone||!D.biz||!D.service){alert('Please fill Name, Phone, Business Name and Service.');return;}
+  if(D.phone.length<10){alert('Please enter a valid 10-digit phone number.');return;}
+
+  var initials=D.biz.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase()||'BZ';
+  document.getElementById('wa-av').textContent=initials;
+  document.getElementById('wa-biz-name').textContent=D.biz+' (AutoLeadz Bot)';
+  document.getElementById('wa-biz-label').textContent=D.biz;
+
+  var now=new Date();calYear=now.getFullYear();calMonth=now.getMonth();
+  renderCal();
+  document.getElementById('sheet-title').textContent=D.biz+' — Leads';
+  buildExistingSheet();
+  buildReminders();
+
+  document.getElementById('review-biz-name').textContent=D.biz;
+  document.getElementById('review-msg-text').innerHTML=
+    'Hi '+D.name+' 🌟<br><br>Thank you so much for visiting <b>'+D.biz+'</b>!<br>'+
+    'We hope you loved your <b>'+D.service+'</b> today ✨<br><br>'+
+    'Could you spare 30 seconds to leave us a Google Review?<br>'+
+    'It truly helps us grow and serve you better 🙏<br><br>'+
+    '⭐ <span style="color:#4d9ff8;text-decoration:underline">g.page/'+D.biz.toLowerCase().replace(/\s+/g,'')+'/review</span><br><br>'+
+    'Thank you, '+D.name+'! See you next time 💚';
+
+  document.getElementById('success-biz').textContent=D.biz;
+  var waMsg='Hi AutoLeadz! 👋\n\nI just tried the interactive demo for '+D.biz+' and I\'m interested!\n\nName: '+D.name+'\nPhone: '+D.phone+'\nBusiness: '+D.biz+'\nService: '+D.service+'\nCity: '+D.city;
+  document.getElementById('wa-cta-link').href='https://wa.me/918123490792?text='+encodeURIComponent(waMsg);
+
+  goTo(1);
+  setTimeout(startWA,500);
+}
+
+// ── WHATSAPP ENGINE ──
+var waQueue=[];
+var waRunning=false;
+var waFlowDone=false;
+var waStage=''; // greeting, menu, booking, pricing, offers, talk, afterhours
+
+function startWA(){
+  document.getElementById('wa-msgs').innerHTML='';
+  waQueue=[];waRunning=false;waFlowDone=false;waStage='greeting';
+  sendGreeting();
+  document.getElementById('wa-input').onkeydown=function(e){if(e.key==='Enter')waSendTyped();};
+}
+
+function sendGreeting(){
+  var biz=D.biz,name=D.name,svc=D.service,city=D.city,lang=D.lang;
+  var msg='';
+  if(lang==='en'){
+    msg='Hey there! 💚✨\n\nWelcome to *'+biz+'*\nSo glad you reached out!\n\nHere\'s how I can help you today:\n\n📅 *Book an Appointment*\n💰 *Services & Pricing*\n🎁 *Today\'s Offers*\n📞 *Talk to Our Team*\n❓ *FAQs*\n\nJust reply with a number 👇';
+  } else if(lang==='en-fun'){
+    msg='Heyyy! 🔥🙌\n\nYou just reached *'+biz+'* — let\'s GO!\n\nWhat brings you here today? 👇\n\n🚀 *1 — Book a Session*\n💪 *2 — Check Prices*\n🎯 *3 — Hot Offers & Deals*\n💬 *4 — Chat With Us*\n⚡ *5 — Quick Questions*\n\nWe\'re FAST — reply now! ⚡';
+  } else if(lang==='hi'){
+    msg='Namaste '+name+'! 🙏✨\n\n*'+biz+'* mein aapka swagat hai!\nHum aapki kaise madad kar sakte hain?\n\n📅 *1 — Appointment Book Karein*\n💰 *2 — Services aur Prices Dekhein*\n🎁 *3 — Aaj ke Special Offers*\n📞 *4 — Humse Seedha Baat Karein*\n❓ *5 — Sawaal Poochein*\n\nBas number reply karein 😊';
+  } else {
+    msg='Hi there! 🌙\n\nThank you for reaching *'+biz+'*!\n\nWe\'re currently closed but your message is safe with us 💚\n\nMeanwhile, you can:\n\n📅 *1 — Book your slot for tomorrow*\n💰 *2 — Browse our services*\n🎁 *3 — See our special offers*\n\nWe open at *9 AM* ☀️\nWe\'ll personally reply then!';
+  }
+  queueBot(msg, function(){
+    showChips(['1️⃣ Book Appointment','2️⃣ Pricing','3️⃣ Offers','4️⃣ Talk to Team','5️⃣ FAQs']);
+  });
+}
+
+function handleChip(ch){
+  hideChips();
+  pushBubble('sent',ch);
+  var svc=D.service,price=priceMap[D.service]||'Contact us',biz=D.biz,name=D.name,city=D.city;
+
+  if(ch.includes('Book') || ch==='1'){
+    waStage='booking';
+    queueBot('Great choice! 🎉\n\nFor your *'+svc+'* at *'+biz+'*, please pick your preferred slot from the calendar.\n\n📍 Location: '+city+'\n⏰ We\'re open Mon–Sat, 9 AM – 7 PM\n\nTap below to choose your date & time 📅', function(){
+      document.getElementById('wa-next').style.display='flex';
+      waFlowDone=true;
+    });
+
+  } else if(ch.includes('Pric') || ch==='2'){
+    waStage='pricing';
+    queueBot('Here\'s what we offer at *'+biz+'* 💼\n\n✅ *'+svc+'*\n💰 Price: '+price+'\n⏱ Duration: 45–60 mins\n📍 '+city+'\n⏰ Mon–Sat, 9 AM – 7 PM\n\n━━━━━━━━\nWe also offer:\n• Package deals (save up to 30%)\n• First visit special discount\n• Loyalty rewards for regulars\n━━━━━━━━\n\nReady to book? Or want to know more?', function(){
+      showChips(['📅 Book Now','🎁 See Offers','📞 Talk to Team','🔙 Main Menu']);
+    });
+
+  } else if(ch.includes('Offer') || ch==='3'){
+    waStage='offers';
+    queueBot('🎁 *Special Offers at '+biz+'!*\n\n⭐ *First Visit:* 20% OFF your service\n🎂 *Birthday Special:* Free add-on service\n👥 *Refer a Friend:* ₹200 cashback each\n📅 *Weekday Deal:* 10% off Mon–Wed\n🌟 *Loyalty Reward:* 5th visit FREE!\n\nThese offers are valid this week only!\n\n━━━━━━━━\nTo avail any offer, just book now 👇', function(){
+      showChips(['📅 Book & Avail Offer','💰 Check Pricing','📞 Talk to Team','🔙 Main Menu']);
+
+  });
+
+  } else if(ch.includes('Talk') || ch==='4'){
+    waStage='talk';
+    queueBot('Of course! 😊\n\nOur team will personally reach you on *+91 '+D.phone+'* within *30 minutes* during working hours.\n\n⏰ We\'re available:\n📅 Monday to Saturday\n🕘 9:00 AM – 7:00 PM\n\nIf it\'s urgent, here\'s what you can do while you wait:', function(){
+      showChips(['📅 Book Directly','💰 Check Pricing','🎁 See Offers']);
+    });
+
+  } else if(ch.includes('FAQ') || ch==='5'){
+    waStage='faq';
+    queueBot('❓ *Frequently Asked Questions*\n\n*Q: How do I reschedule?*\nA: Just reply RESCHEDULE and we\'ll sort it!\n\n*Q: Is parking available?*\nA: Yes, free parking right outside 🚗\n\n*Q: Do you accept cards?*\nA: Yes! UPI, card & cash all accepted 💳\n\n*Q: How long does '+svc+' take?*\nA: Usually 45–60 minutes\n\nMore questions?', function(){
+      showChips(['📅 Book Now','📞 Talk to Team','🔙 Main Menu']);
+    });
+
+  } else if(ch.includes('Main Menu') || ch.includes('🔙')){
+    waStage='menu';
+    queueBot('Back to the main menu! 😊\n\nHow can I help you?', function(){
+      showChips(['1️⃣ Book Appointment','2️⃣ Pricing','3️⃣ Offers','4️⃣ Talk to Team','5️⃣ FAQs']);
+    });
+
+  } else if(ch.includes('Book Now') || ch.includes('Book & Avail') || ch.includes('Book Directly')){
+    waStage='booking';
+    queueBot('Perfect! 🎉 Tap below to pick your slot.', function(){
+      document.getElementById('wa-next').style.display='flex';
+      waFlowDone=true;
+    });
+
+  } else if(ch.includes('Check Pric')){
+    handleChip('2');
+  } else if(ch.includes('See Offer')){
+    handleChip('3');
+  } else if(ch.includes('Talk to Team')){
+    handleChip('4');
+  }
+}
+
+function waSendTyped(){
+  var inp=document.getElementById('wa-input');
+  var val=inp.value.trim();if(!val)return;inp.value='';
+  handleChip(val);
+}
+
+function queueBot(text,cb){
+  waQueue.push({text:text,cb:cb});
+  if(!waRunning)processQueue();
+}
+
+function processQueue(){
+  if(waQueue.length===0){waRunning=false;return;}
+  waRunning=true;
+  var item=waQueue.shift();
+  var body=document.getElementById('wa-msgs');
+  var typ=document.createElement('div');
+  typ.className='wtyping';typ.innerHTML='<span></span><span></span><span></span>';
+  body.appendChild(typ);body.scrollTop=body.scrollHeight;
+  var delay=Math.min(700+item.text.length*6,1600);
+  setTimeout(function(){
+    if(typ.parentNode)typ.parentNode.removeChild(typ);
+    pushBubble('recv',item.text);
+    if(item.cb)item.cb();
+    setTimeout(processQueue,200);
+  },delay);
+}
+
+function pushBubble(type,text){
+  var body=document.getElementById('wa-msgs');
+  var b=document.createElement('div');b.className='wbubble '+type;
+  var now=new Date(),h=now.getHours(),m=now.getMinutes();
+  var t=(h%12||12)+':'+(m<10?'0':'')+m+(h>=12?' PM':' AM');
+  var html=text.replace(/\*(.*?)\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+  b.innerHTML=html+'<div class="wtime">'+t+(type==='sent'?' <span class="tick">✓✓</span>':'')+'</div>';
+  body.appendChild(b);body.scrollTop=body.scrollHeight;
+}
+
+function showChips(arr){
+  var c=document.getElementById('chips-wrap');
+  c.style.display='flex';c.innerHTML='';
+  arr.forEach(function(ch){
+    var el=document.createElement('div');el.className='chip';el.textContent=ch;
+    el.onclick=function(){handleChip(ch);};c.appendChild(el);
+  });
+}
+function hideChips(){
+  var c=document.getElementById('chips-wrap');
+  c.style.display='none';c.innerHTML='';
+}
+
+// ── CALENDAR ──
+function renderCal(){
+  var now=new Date(),today=now.getDate(),tMonth=now.getMonth(),tYear=now.getFullYear();
+  document.getElementById('cal-title').textContent=MONTHS[calMonth]+' '+calYear;
+  var firstDay=new Date(calYear,calMonth,1).getDay();
+  var daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  var dg=document.getElementById('cal-days');dg.innerHTML='';
+  DAYS.forEach(function(d){var el=document.createElement('div');el.className='cal-day-name';el.textContent=d;dg.appendChild(el);});
+  for(var i=0;i<firstDay;i++){var el=document.createElement('div');el.className='cal-date empty';dg.appendChild(el);}
+  for(var day=1;day<=daysInMonth;day++){
+    var el=document.createElement('div');el.className='cal-date';el.textContent=day;
+    var thisDate=new Date(calYear,calMonth,day);
+    var isPast=thisDate<new Date(tYear,tMonth,today);
+    var isToday=(day===today&&calMonth===tMonth&&calYear===tYear);
+    var fbKey=calYear+'-'+calMonth+'-'+day;
+    var isFull=fullyBooked.includes(fbKey);
+    if(isPast)el.classList.add('past');
+    else if(isFull)el.classList.add('booked');
+    else if(isToday)el.classList.add('today');
+    if(!isPast&&!isFull){
+      (function(d){
+        el.onclick=function(){
+          document.querySelectorAll('.cal-date').forEach(function(x){x.classList.remove('selected');});
+          this.classList.add('selected');selDate=d;selDateObj=new Date(calYear,calMonth,d);
+          renderSlots(calYear,calMonth,d);updateConfirmBtn();
+        }.bind(el);
+      })(day);
+    }
+    dg.appendChild(el);
+  }
+  document.getElementById('time-slots').innerHTML='';selTime=null;updateConfirmBtn();
+}
+
+function renderSlots(y,m,d){
+  var key=y+'-'+m+'-'+d;var taken=takenSlotsMap[key]||[];
+  var ts=document.getElementById('time-slots');ts.innerHTML='';
+  ALL_SLOTS.forEach(function(s){
+    var el=document.createElement('div');el.className='slot';el.textContent=s;
+    if(taken.includes(s)){el.classList.add('taken');}
+    else{el.onclick=function(){document.querySelectorAll('.slot').forEach(function(x){x.classList.remove('selected');});this.classList.add('selected');selTime=s;updateConfirmBtn();}.bind(el);}
+    ts.appendChild(el);
+  });
+}
+
+function updateConfirmBtn(){
+  var btn=document.getElementById('confirm-appt');
+  if(selDate&&selTime){btn.disabled=false;btn.textContent='✅ Confirm — '+MONTHS[calMonth].slice(0,3)+' '+selDate+', '+calYear+' at '+selTime;}
+  else if(selDate){btn.disabled=true;btn.textContent='Now select a time slot above';}
+  else{btn.disabled=true;btn.textContent='Select a date & time above';}
+}
+
+function prevMonth(){
+  var now=new Date();
+  if(calMonth===now.getMonth()&&calYear===now.getFullYear())return;
+  if(calMonth===0){calMonth=11;calYear--;}else{calMonth--;}
+  selDate=null;selTime=null;renderCal();
+}
+function nextMonth(){
+  if(calMonth===11){calMonth=0;calYear++;}else{calMonth++;}
+  selDate=null;selTime=null;renderCal();
+}
+
+function confirmAppt(){
+  var dateStr=MONTHS[calMonth]+' '+selDate+', '+calYear;
+  var popup=document.getElementById('appt-popup');
+  document.getElementById('appt-popup-text').innerHTML=
+    '📅 <strong>'+dateStr+' at '+selTime+'</strong><br>'+
+    '👤 <strong>'+D.name+'</strong> · 📱 +91 '+D.phone+'<br>'+
+    '💼 <strong>'+D.service+'</strong> at <strong>'+D.biz+'</strong><br><br>'+
+    '📲 WhatsApp confirmation auto-sent to +91 '+D.phone+' ✅';
+  popup.style.display='block';
+  buildSheet(dateStr);
+  setTimeout(function(){goTo(3);},1800);
+}
+
+// ── REMINDERS ──
+function buildReminders(){
+  var name=D.name,svc=D.service,biz=D.biz;
+  document.getElementById('reminder-24').innerHTML=
+    'Hi <b>'+name+'</b>! 👋<br><br>'+
+    'Just a friendly reminder ⏰<br><br>'+
+    'Your <b>'+svc+'</b> appointment is<br>'+
+    '<b>tomorrow at [Time]</b> at '+biz+' 📍<br><br>'+
+    'Please reply:<br>'+
+    '✅ <b>YES</b> — to confirm<br>'+
+    '🔄 <b>RESCHEDULE</b> — to change slot<br>'+
+    '❌ <b>CANCEL</b> — to cancel<br><br>'+
+    'See you tomorrow! 💚<br>— Team '+biz;
+
+  document.getElementById('reminder-2').innerHTML=
+    'Hi <b>'+name+'</b>! ⏰<br><br>'+
+    'Your <b>'+svc+'</b> is in just <b>2 hours!</b><br><br>'+
+    '📍 '+biz+', [Address]<br>'+
+    '🕐 Today at [Time]<br><br>'+
+    'Please arrive 5 mins early 🙏<br>'+
+    'Questions? Reply here anytime 💬<br><br>'+
+    'See you soon! — Team '+biz;
+
+  document.getElementById('reminder-pay').innerHTML=
+    'Hi <b>'+name+'</b>! 💰<br><br>'+
+    'Friendly reminder — your invoice for<br>'+
+    '<b>'+svc+'</b> at '+biz+' is pending.<br><br>'+
+    '💳 Pay now (takes 30 seconds):<br>'+
+    '👉 [UPI / Payment link]<br><br>'+
+    'Questions? Just reply here 😊<br>'+
+    'Thank you! — Team '+biz;
+}
+
+// ── SHEET ──
+var existingRows=[
+  {name:'Priya Sharma',phone:'98765•••••',service:'Facial',date:'Yesterday, 11 AM',city:'Bengaluru',status:'s-done',label:'⭐ Review Sent'},
+  {name:'Arjun Nair',phone:'87654•••••',service:'Haircut',date:'2 days ago, 3 PM',city:'Mysuru',status:'s-conf',label:'📅 Confirmed'},
+  {name:'Meena Patel',phone:'76543•••••',service:'Yoga Class',date:'3 days ago, 7 AM',city:'Hubli',status:'s-done',label:'⭐ Review Sent'},
+];
+
+function buildExistingSheet(){
+  var tb=document.getElementById('sheet-body');tb.innerHTML='';
+  existingRows.forEach(function(r,i){addSheetRow(i+1,r,false);});
+}
+
+function buildSheet(dateStr){
+  var tb=document.getElementById('sheet-body');
+  var row=tb.insertRow(0);row.className='new-row';
+  var data=[tb.rows.length,D.name,'+91 '+D.phone,D.service,dateStr+' '+selTime,D.city,'<span class="status-pill s-new">🟢 New</span>'];
+  data.forEach(function(v){var td=row.insertCell(-1);td.innerHTML=v;});
+  Array.from(tb.rows).forEach(function(r,i){r.cells[0].textContent=i+1;});
+}
+
+function addSheetRow(num,r,isNew){
+  var tb=document.getElementById('sheet-body');
+  var row=tb.insertRow();if(isNew)row.className='new-row';
+  var data=[num,r.name,r.phone,r.service,r.date,r.city,'<span class="status-pill '+r.status+'">'+r.label+'</span>'];
+  data.forEach(function(v){var td=row.insertCell(-1);td.innerHTML=v;});
+}
+
+// ── REVIEW ──
+var starLabels=['','😟 Poor — we\'ll do better','😐 Below Average','🙂 Good, thank you!','😊 Very Good!','🤩 Excellent — you made our day!'];
+function rateStar(n){
+  starRating=n;
+  document.querySelectorAll('.star').forEach(function(s,i){s.classList.toggle('lit',i<n);});
+  document.getElementById('star-label').textContent=starLabels[n];
+  if(n>=4){document.getElementById('review-input').placeholder='Tell us what you loved most! ✨';}
+  else{document.getElementById('review-input').placeholder='We\'re sorry to hear that. What can we improve?';}
+}
+function postReview(){
+  if(!starRating){alert('Please tap a star to rate first!');return;}
+  goTo(6);
+}
+
+// ── NAV ──
+function goTo(n){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('s'+n).classList.add('active');
+  for(var i=0;i<7;i++){
+    var sd=document.getElementById('sd-'+i);
+    if(!sd)continue;
+    sd.classList.remove('active','done');
+    if(i<n)sd.classList.add('done');
+    else if(i===n)sd.classList.add('active');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
